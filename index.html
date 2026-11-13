@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ViralGempak.com – Berita Tular Malaysia</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800;900&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fffdf5;--surface:#ffffff;--ink:#1b1710;--muted:#6b6455;--line:#e8e1cc;--accent:#ffd21f;--accent-ink:#1b1710;--hot:#e4322b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#14120d;--surface:#1e1b14;--ink:#f6f1e1;--muted:#a79f8a;--line:#332f23}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#14120d;--surface:#1e1b14;--ink:#f6f1e1;--muted:#a79f8a;--line:#332f23}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;font-size:17px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header{background:var(--accent);color:var(--accent-ink);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--accent);z-index:30}
+.bar{display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{font-family:Archivo,sans-serif;font-weight:900;font-size:24px;letter-spacing:-.02em}
+.logo span{background:var(--accent-ink);color:var(--accent);padding:0 6px;margin-left:2px;border-radius:4px}
+.tools{display:flex;gap:8px}
+button{font:inherit;cursor:pointer}
+.icon{background:transparent;border:2px solid var(--accent-ink);color:var(--accent-ink);border-radius:8px;height:36px;padding:0 12px;font-weight:600}
+.icon:focus-visible,.chip:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:4px 14px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.ticker{background:var(--ink);color:var(--bg);font-size:15px;padding:8px 0;overflow:hidden}
+.ticker .wrap{display:flex;gap:12px;align-items:center}
+.ticker b{background:var(--hot);color:#fff;padding:0 8px;border-radius:4px;flex:none}
+.ticker p{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero{display:grid;gap:16px;margin:20px 0}
+.lead{background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;min-height:280px}
+.lead h1{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(28px,6vw,46px);line-height:1.05;letter-spacing:-.02em;margin:8px 0 12px}
+.tag{font-weight:600;font-size:14px;color:var(--hot)}
+.lead .tag{color:var(--accent-ink);background:var(--surface);align-self:flex-start;padding:0 8px;border-radius:4px}
+.meta{font-size:14px;color:var(--muted)}
+.lead .meta{color:var(--accent-ink);opacity:.8}
+.side{display:grid;gap:12px;align-content:start}
+.side a{display:block;border-bottom:1px solid var(--line);padding-bottom:12px}
+.side h3{font-family:Archivo,sans-serif;font-weight:800;font-size:19px;line-height:1.2;margin:2px 0 4px}
+h2{font-family:Archivo,sans-serif;font-weight:900;font-size:22px;margin:28px 0 12px}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.thumb{height:140px;display:grid;place-items:center;font-size:44px}
+.card .body{padding:14px}
+.card h3{font-family:Archivo,sans-serif;font-weight:800;font-size:19px;line-height:1.22;margin:2px 0 8px}
+.card:hover h3{text-decoration:underline}
+.empty{display:none;padding:24px;border:2px dashed var(--line);border-radius:12px;color:var(--muted)}
+form.news{background:var(--ink);color:var(--bg);border-radius:14px;padding:24px;margin:32px 0;display:grid;gap:10px}
+form.news h2{margin:0;color:var(--accent)}
+form.news p{margin:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input{flex:1 1 200px;min-width:0;height:44px;border-radius:8px;border:0;padding:0 12px;font:inherit;background:var(--bg);color:var(--ink)}
+.go{height:44px;border:0;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:800;padding:0 20px}
+.msg{color:var(--accent);min-height:1.5em}
+footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);font-size:14px}
+@media(min-width:720px){.hero{grid-template-columns:1.6fr 1fr}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:960px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+.gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;place-items:center;padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));text-align:center}.gate[hidden]{display:none}.gate-box{max-width:420px;width:100%}.gate h2{font-family:Archivo,sans-serif;font-weight:900;font-size:30px;line-height:1.1;margin:0 0 8px}.gate p{margin:0;color:var(--muted)}.count{font-family:Archivo,sans-serif;font-weight:900;font-size:48px;margin:16px 0;font-variant-numeric:tabular-nums}.gate .go{width:100%;height:52px;font-size:18px}
+@media(prefers-reduced-motion:no-preference){.ticker p{animation:in .6s ease}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="#" aria-label="ViralGempak.com">VIRAL<span>GEMPAK</span></a>
+    <div class="tools">
+      <button class="icon" id="theme" type="button">Gelap</button>
+    </div>
+  </div>
+</header>
+
+<div class="ticker"><div class="wrap"><b>TERKINI</b><p id="tick"></p></div></div>
+
+<main class="wrap">
+  <div class="chips" id="chips" role="group" aria-label="Kategori"></div>
+
+  <section class="hero" aria-label="Berita utama">
+    <a class="lead" href="#" id="lead">
+      <span class="tag">Tular</span>
+      <h1>Warung tepi jalan jadi tumpuan ramai selepas video nasi lemak RM3 tersebar</h1>
+      <span class="meta">Oleh Pasukan Editorial · 2 jam lalu · 12k perkongsian</span>
+    </a>
+    <div class="side" id="side"></div>
+  </section>
+
+  <h2>Cerita terkini</h2>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty">Tiada cerita dalam kategori ini lagi. Cuba kategori lain.</p>
+
+  <form class="news" id="form" novalidate>
+    <h2>Dapatkan berita tular setiap hari</h2>
+    <p>Satu e-mel pagi, lima cerita paling hangat.</p>
+    <div class="row">
+      <input type="email" id="email" placeholder="Alamat e-mel anda" aria-label="Alamat e-mel" autocomplete="email">
+      <button class="go" type="submit">Langgan</button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+  </form>
+</main>
+
+<footer>
+  <div class="wrap">ViralGempak.com ialah laman contoh. Semua tajuk dan cerita adalah rekaan untuk tujuan reka bentuk.</div>
+</footer>
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gt"><div class="gate-box"><h2 id="gt">Follow dulu untuk baca</h2><p>Tekan Follow untuk buka semua berita sekarang. Atau tunggu masa ini habis:</p><div class="count" id="left">01:00:00</div><button class="go" id="follow" type="button">Follow sekarang</button></div></div>
+<script>
+const cats=["Semua","Tular","Hiburan","Makanan","Sukan","Teknologi","Gaya Hidup"];
+const hues={Tular:["#ffb4a8","🔥"],Hiburan:["#c9b8ff","🎬"],Makanan:["#ffd9a0","🍜"],Sukan:["#b6e8b0","⚽"],Teknologi:["#a8d8ff","📱"],"Gaya Hidup":["#ffc8e3","🌿"]};
+const posts=[
+["Tular","Netizen kongsi cara jimat bil elektrik, ramai cuba dan terkejut dengan hasilnya","1 jam lalu"],
+["Makanan","Roti canai viral di Pulau Pinang: kuah dal rahsia warisan tiga generasi","3 jam lalu"],
+["Hiburan","Drama bersiri baharu rekod tontonan tertinggi dalam masa 24 jam","4 jam lalu"],
+["Sukan","Pasukan bola sepak kampung menang kejohanan selepas 20 tahun menunggu","5 jam lalu"],
+["Teknologi","Aplikasi tempatan bantu cari parkir kosong kini boleh dimuat turun percuma","6 jam lalu"],
+["Gaya Hidup","Anak muda buka kafe buku di rumah kedai lama, pelanggan beratur sejak pagi","7 jam lalu"],
+["Tular","Kucing tersesat pulang sendiri selepas 3 hari, pemilik nangis tengok CCTV","9 jam lalu"],
+["Makanan","Cendol durian bawah RM5 di Melaka jadi buruan pelancong hujung minggu","10 jam lalu"],
+["Teknologi","Pelajar sekolah cipta robot penyiram pokok guna barang terpakai","12 jam lalu"]
+];
+const el=id=>document.getElementById(id);
+let active="Semua";
+function card(p){const[c,t,w]=p,[bg,em]=hues[c];return `<a class="card" href="#"><div class="thumb" style="background:${bg}">${em}</div><div class="body"><span class="tag">${c}</span><h3>${t}</h3><span class="meta">${w}</span></div></a>`}
+function render(){
+  const list=posts.filter(p=>active==="Semua"||p[0]===active);
+  el("grid").innerHTML=list.map(card).join("");
+  el("empty").style.display=list.length?"none":"block";
+  document.querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.c===active));
+}
+el("chips").innerHTML=cats.map(c=>`<button class="chip" type="button" data-c="${c}" aria-pressed="false">${c}</button>`).join("");
+el("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){active=b.dataset.c;render()}});
+el("side").innerHTML=posts.slice(0,3).map(p=>`<a href="#"><span class="tag">${p[0]}</span><h3>${p[1]}</h3><span class="meta">${p[2]}</span></a>`).join("");
+let i=0;const tick=el("tick");
+function nextTick(){tick.style.animation="none";tick.offsetHeight;tick.style.animation="";tick.textContent=posts[i%posts.length][1];i++}
+nextTick();setInterval(nextTick,4000);
+el("form").addEventListener("submit",e=>{e.preventDefault();const v=el("email").value.trim();
+  el("msg").textContent=/^\S+@\S+\.\S+$/.test(v)?"Terima kasih! Anda akan terima e-mel pertama esok pagi.":"Masukkan alamat e-mel yang sah, contohnya nama@contoh.com."});
+el("theme").addEventListener("click",()=>{const r=document.documentElement;const dark=getComputedStyle(r).colorScheme.includes("dark");
+  r.setAttribute("data-theme",dark?"light":"dark");el("theme").textContent=dark?"Gelap":"Cerah"});
+render();
+/* Tukar pautan ini kepada halaman Facebook/Instagram/Threads anda */
+const FOLLOW_URL="https://www.facebook.com/share/1CKreifYAU/";
+const WAIT=60*60*1000;
+const gate=el("gate"),left=el("left");
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+let start=+store("vg_start")||0;
+if(!start){start=Date.now();store("vg_start",String(start))}
+const opened=store("vg_open")==="1";
+let timer;
+function pad(n){return String(n).padStart(2,"0")}
+function closeGate(){gate.hidden=true;document.body.style.overflow="";clearInterval(timer)}
+function tickGate(){const r=start+WAIT-Date.now();if(r<=0){closeGate();return}const s=Math.ceil(r/1000);left.textContent=pad(Math.floor(s/3600))+":"+pad(Math.floor(s%3600/60))+":"+pad(s%60)}
+if(opened||Date.now()-start>=WAIT){gate.hidden=true}else{document.body.style.overflow="hidden";tickGate();timer=setInterval(tickGate,1000)}
+el("follow").addEventListener("click",()=>{store("vg_open","1");window.open(FOLLOW_URL,"_blank","noopener");closeGate()});
+</script>
+</body>
+</html>
