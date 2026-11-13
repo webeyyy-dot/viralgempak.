@@ -34,7 +34,7 @@ button{font:inherit;cursor:pointer}
 .ticker p{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hero{display:grid;gap:16px;margin:20px 0}
 .lead{background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;min-height:280px}
-.lead h1{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(28px,6vw,46px);line-height:1.05;letter-spacing:-.02em;margin:8px 0 12px}
+.lead h1{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(22px,5vw,36px);line-height:1.1;letter-spacing:-.02em;margin:8px 0 12px}
 .tag{font-weight:600;font-size:14px;color:var(--hot)}
 .lead .tag{color:var(--accent-ink);background:var(--surface);align-self:flex-start;padding:0 8px;border-radius:4px}
 .meta{font-size:14px;color:var(--muted)}
@@ -61,6 +61,7 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);f
 @media(min-width:720px){.hero{grid-template-columns:1.6fr 1fr}.grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:960px){.grid{grid-template-columns:repeat(3,1fr)}}
 
+.art{max-width:680px;margin:20px auto}.art h1{font-family:Archivo,sans-serif;font-weight:900;font-size:clamp(24px,5vw,36px);line-height:1.12;letter-spacing:-.02em;margin:8px 0 10px}.art p{margin:0 0 1em;font-size:18px;line-height:1.7}.art .meta{display:block;margin-bottom:20px}.back{display:inline-block;font-weight:600;padding:8px 0}
 .gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;place-items:center;padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));text-align:center}.gate[hidden]{display:none}.gate-box{max-width:420px;width:100%}.gate h2{font-family:Archivo,sans-serif;font-weight:900;font-size:30px;line-height:1.1;margin:0 0 8px}.gate p{margin:0;color:var(--muted)}.count{font-family:Archivo,sans-serif;font-weight:900;font-size:48px;margin:16px 0;font-variant-numeric:tabular-nums}.gate .go{width:100%;height:52px;font-size:18px}
 @media(prefers-reduced-motion:no-preference){.ticker p{animation:in .6s ease}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
 </style>
@@ -78,20 +79,26 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);f
 <div class="ticker"><div class="wrap"><b>TERKINI</b><p id="tick"></p></div></div>
 
 <main class="wrap">
+  <div id="home">
   <div class="chips" id="chips" role="group" aria-label="Kategori"></div>
 
   <section class="hero" aria-label="Berita utama">
-    <a class="lead" href="#" id="lead">
-      <span class="tag">Tular</span>
-      <h1>Warung tepi jalan jadi tumpuan ramai selepas video nasi lemak RM3 tersebar</h1>
-      <span class="meta">Oleh Pasukan Editorial · 2 jam lalu · 12k perkongsian</span>
-    </a>
+    <a class="lead" href="#" id="lead"></a>
     <div class="side" id="side"></div>
   </section>
 
   <h2>Cerita terkini</h2>
   <div class="grid" id="grid"></div>
   <p class="empty" id="empty">Tiada cerita dalam kategori ini lagi. Cuba kategori lain.</p>
+  </div>
+
+  <article class="art" id="article" hidden>
+    <a class="back" href="#">&larr; Semua berita</a>
+    <span class="tag" id="a-tag"></span>
+    <h1 id="a-title"></h1>
+    <span class="meta" id="a-meta"></span>
+    <div id="a-body"></div>
+  </article>
 
   <form class="news" id="form" novalidate>
     <h2>Dapatkan berita tular setiap hari</h2>
@@ -105,27 +112,18 @@ footer{border-top:1px solid var(--line);padding:24px 0 40px;color:var(--muted);f
 </main>
 
 <footer>
-  <div class="wrap">ViralGempak.com ialah laman contoh. Semua tajuk dan cerita adalah rekaan untuk tujuan reka bentuk.</div>
+  <div class="wrap">ViralGempak.com © 2026. Berita tular Malaysia.</div>
 </footer>
 
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gt"><div class="gate-box"><h2 id="gt">Follow dulu untuk baca</h2><p>Tekan Follow untuk buka semua berita sekarang. Atau tunggu masa ini habis:</p><div class="count" id="left">01:00:00</div><button class="go" id="follow" type="button">Follow sekarang</button></div></div>
-<script>
+<script type="module">
 const cats=["Semua","Tular","Hiburan","Makanan","Sukan","Teknologi","Gaya Hidup"];
 const hues={Tular:["#ffb4a8","🔥"],Hiburan:["#c9b8ff","🎬"],Makanan:["#ffd9a0","🍜"],Sukan:["#b6e8b0","⚽"],Teknologi:["#a8d8ff","📱"],"Gaya Hidup":["#ffc8e3","🌿"]};
-const posts=[
-["Tular","Netizen kongsi cara jimat bil elektrik, ramai cuba dan terkejut dengan hasilnya","1 jam lalu"],
-["Makanan","Roti canai viral di Pulau Pinang: kuah dal rahsia warisan tiga generasi","3 jam lalu"],
-["Hiburan","Drama bersiri baharu rekod tontonan tertinggi dalam masa 24 jam","4 jam lalu"],
-["Sukan","Pasukan bola sepak kampung menang kejohanan selepas 20 tahun menunggu","5 jam lalu"],
-["Teknologi","Aplikasi tempatan bantu cari parkir kosong kini boleh dimuat turun percuma","6 jam lalu"],
-["Gaya Hidup","Anak muda buka kafe buku di rumah kedai lama, pelanggan beratur sejak pagi","7 jam lalu"],
-["Tular","Kucing tersesat pulang sendiri selepas 3 hari, pemilik nangis tengok CCTV","9 jam lalu"],
-["Makanan","Cendol durian bawah RM5 di Melaka jadi buruan pelancong hujung minggu","10 jam lalu"],
-["Teknologi","Pelajar sekolah cipta robot penyiram pokok guna barang terpakai","12 jam lalu"]
-];
+const posts=await fetch("berita.json",{cache:"no-store"}).then(r=>r.json()).then(a=>a.map(o=>[o.kat,o.tajuk,o.tarikh,o.isi,o.id])).catch(()=>[]);
 const el=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let active="Semua";
-function card(p){const[c,t,w]=p,[bg,em]=hues[c];return `<a class="card" href="#"><div class="thumb" style="background:${bg}">${em}</div><div class="body"><span class="tag">${c}</span><h3>${t}</h3><span class="meta">${w}</span></div></a>`}
+function card(p){const[c,t,w]=p,[bg,em]=hues[c];return `<a class="card" href="#${p[4]}"><div class="thumb" style="background:${bg}">${em}</div><div class="body"><span class="tag">${c}</span><h3>${t}</h3><span class="meta">${w}</span></div></a>`}
 function render(){
   const list=posts.filter(p=>active==="Semua"||p[0]===active);
   el("grid").innerHTML=list.map(card).join("");
@@ -134,15 +132,19 @@ function render(){
 }
 el("chips").innerHTML=cats.map(c=>`<button class="chip" type="button" data-c="${c}" aria-pressed="false">${c}</button>`).join("");
 el("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){active=b.dataset.c;render()}});
-el("side").innerHTML=posts.slice(0,3).map(p=>`<a href="#"><span class="tag">${p[0]}</span><h3>${p[1]}</h3><span class="meta">${p[2]}</span></a>`).join("");
+const L=posts[0],lead=el("lead");
+if(!L){lead.hidden=true}else{lead.href="#"+L[4];lead.innerHTML=`<span class="tag">${esc(L[0])}</span><h1>${esc(L[1])}</h1><span class="meta">${esc(L[2])}</span>`}
+function route(){const p=posts.find(x=>x[4]===location.hash.slice(1));el("home").hidden=!!p;el("article").hidden=!p;
+  if(p){el("a-tag").textContent=p[0];el("a-title").textContent=p[1];el("a-meta").textContent=p[2];el("a-body").innerHTML=p[3].map(t=>`<p>${esc(t)}</p>`).join("");document.title=p[1]+" – ViralGempak.com";window.scrollTo(0,0)}else{document.title="ViralGempak.com – Berita Tular Malaysia"}}
+el("side").innerHTML=posts.slice(1,4).map(p=>`<a href="#${p[4]}"><span class="tag">${p[0]}</span><h3>${esc(p[1])}</h3><span class="meta">${p[2]}</span></a>`).join("");
 let i=0;const tick=el("tick");
-function nextTick(){tick.style.animation="none";tick.offsetHeight;tick.style.animation="";tick.textContent=posts[i%posts.length][1];i++}
+function nextTick(){if(!posts.length)return;tick.style.animation="none";tick.offsetHeight;tick.style.animation="";tick.textContent=posts[i%posts.length][1];i++}
 nextTick();setInterval(nextTick,4000);
 el("form").addEventListener("submit",e=>{e.preventDefault();const v=el("email").value.trim();
   el("msg").textContent=/^\S+@\S+\.\S+$/.test(v)?"Terima kasih! Anda akan terima e-mel pertama esok pagi.":"Masukkan alamat e-mel yang sah, contohnya nama@contoh.com."});
 el("theme").addEventListener("click",()=>{const r=document.documentElement;const dark=getComputedStyle(r).colorScheme.includes("dark");
   r.setAttribute("data-theme",dark?"light":"dark");el("theme").textContent=dark?"Gelap":"Cerah"});
-render();
+render();route();window.addEventListener("hashchange",route);
 /* Tukar pautan ini kepada halaman Facebook/Instagram/Threads anda */
 const FOLLOW_URL="https://www.facebook.com/share/1CKreifYAU/";
 const WAIT=60*60*1000;

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin – ViralGempak.com</title>
+<style>
+:root{--bg:#fffdf5;--surface:#fff;--ink:#1b1710;--muted:#6b6455;--line:#d9d1ba;--accent:#ffd21f;--hot:#e4322b;--ok:#1a7f37}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#14120d;--surface:#1e1b14;--ink:#f6f1e1;--muted:#a79f8a;--line:#3a3527;--ok:#4ac26b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:26px;margin:8px 0 4px}
+h2{font-size:20px;margin:28px 0 8px}
+p.note{color:var(--muted);margin:0 0 16px;font-size:15px}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:260px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{display:flex;gap:8px;align-items:center;font-weight:400;margin-top:10px}
+.check input{width:auto}
+button{font:inherit;font-weight:800;border:0;border-radius:8px;background:var(--accent);color:#1b1710;height:48px;padding:0 20px;cursor:pointer}
+button.alt{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+button.del{height:36px;background:var(--hot);color:#fff;font-size:14px}
+button:disabled{opacity:.5}
+.actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+#msg{min-height:1.5em;margin-top:12px;font-weight:600}
+ul{list-style:none;padding:0;margin:0}
+li{display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:10px 0}
+li span{flex:1;min-width:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Admin ViralGempak</h1>
+  <p class="note">Tulis berita di sini dan ia terus diterbitkan ke laman. Tidak perlu muat naik fail.</p>
+
+  <h2>1. Akaun GitHub</h2>
+  <div class="row">
+    <div><label for="user">Nama pengguna</label><input id="user" autocomplete="off" autocapitalize="off"></div>
+    <div><label for="repo">Nama repositori</label><input id="repo" autocomplete="off" autocapitalize="off"></div>
+  </div>
+  <label for="token">Token GitHub</label>
+  <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
+  <label class="check"><input type="checkbox" id="remember"> Ingat token di telefon ini sahaja</label>
+
+  <h2>2. Tulis berita</h2>
+  <form id="form">
+    <label for="kat">Kategori</label>
+    <select id="kat"><option>Tular</option><option>Hiburan</option><option>Makanan</option><option>Sukan</option><option>Teknologi</option><option>Gaya Hidup</option></select>
+    <label for="tajuk">Tajuk</label>
+    <input id="tajuk" autocomplete="off">
+    <label for="isi">Isi berita</label>
+    <textarea id="isi" placeholder="Tulis atau tampal berita di sini. Biarkan satu baris kosong antara setiap perenggan."></textarea>
+    <div class="actions"><button type="submit" id="pub">Terbitkan</button></div>
+  </form>
+  <div id="msg" role="status"></div>
+
+  <h2>Berita sedia ada</h2>
+  <div class="actions" style="margin-top:0"><button class="alt" id="load" type="button">Muat senarai berita</button></div>
+  <ul id="list"></ul>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const bulan=["Januari","Februari","Mac","April","Mei","Jun","Julai","Ogos","September","Oktober","November","Disember"];
+function lsGet(k){try{return localStorage.getItem(k)||""}catch(e){return ""}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+$("user").value=lsGet("vg_user")||"webeyyy-dot";
+$("repo").value=lsGet("vg_repo")||"viralgempak.";
+$("token").value=lsGet("vg_token");
+$("remember").checked=!!lsGet("vg_token");
+
+function status(t,bad){const m=$("msg");m.textContent=t;m.style.color=bad?"var(--hot)":"var(--ok)"}
+function busy(b){document.querySelectorAll("button").forEach(x=>x.disabled=b)}
+function keep(){lsSet("vg_user",$("user").value.trim());lsSet("vg_repo",$("repo").value.trim());if($("remember").checked)lsSet("vg_token",$("token").value.trim());else lsDel("vg_token")}
+const b64=s=>{let r="";new TextEncoder().encode(s).forEach(c=>r+=String.fromCharCode(c));return btoa(r)};
+const unb64=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,"")),c=>c.charCodeAt(0)));
+const api=()=>"https://api.github.com/repos/"+encodeURIComponent($("user").value.trim())+"/"+encodeURIComponent($("repo").value.trim())+"/contents/berita.json";
+const hdr=()=>({Authorization:"Bearer "+$("token").value.trim(),Accept:"application/vnd.github+json"});
+
+async function get(){
+  const r=await fetch(api(),{headers:hdr(),cache:"no-store"});
+  if(!r.ok)throw new Error(r.status===401?"Token salah atau sudah tamat tempoh.":r.status===404?"Fail berita.json tidak dijumpai. Semak nama pengguna, nama repositori dan token.":"Ralat GitHub ("+r.status+").");
+  const j=await r.json();
+  return{sha:j.sha,list:JSON.parse(unb64(j.content))};
+}
+async function put(list,sha,msg){
+  const r=await fetch(api(),{method:"PUT",headers:{...hdr(),"Content-Type":"application/json"},body:JSON.stringify({message:msg,content:b64(JSON.stringify(list,null,2)),sha})});
+  if(!r.ok)throw new Error(r.status===401||r.status===403?"Token tiada kebenaran menulis. Pilih Contents: Read and write.":r.status===409?"Fail baru sahaja berubah. Cuba sekali lagi.":"Gagal menyimpan ("+r.status+").");
+}
+function showList(list){
+  const ul=$("list");ul.textContent="";
+  list.forEach(p=>{
+    const li=document.createElement("li"),sp=document.createElement("span"),bt=document.createElement("button");
+    sp.textContent=p.kat+": "+p.tajuk;bt.textContent="Padam";bt.type="button";bt.className="del";bt.dataset.id=p.id;
+    li.append(sp,bt);ul.append(li);
+  });
+  if(!list.length)ul.textContent="Tiada berita.";
+}
+
+$("form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const tajuk=$("tajuk").value.trim(),isi=$("isi").value.split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
+  if(!$("token").value.trim()){status("Masukkan token GitHub dahulu.",1);return}
+  if(!tajuk||!isi.length){status("Isi tajuk dan berita dahulu.",1);return}
+  keep();busy(true);status("Sedang menerbitkan...");
+  try{
+    const{sha,list}=await get(),d=new Date();
+    list.unshift({id:"berita-"+Date.now(),kat:$("kat").value,tajuk,tarikh:"Oleh Pasukan Editorial \u00b7 "+d.getDate()+" "+bulan[d.getMonth()]+" "+d.getFullYear(),isi});
+    await put(list,sha,"Tambah berita: "+tajuk.slice(0,50));
+    status("Berjaya! Berita akan muncul di laman dalam 1 hingga 2 minit.");
+    $("tajuk").value="";$("isi").value="";showList(list);
+  }catch(err){status(err.message,1)}
+  busy(false);
+});
+$("load").addEventListener("click",async()=>{
+  keep();busy(true);status("Memuatkan...");
+  try{const{list}=await get();showList(list);status("")}catch(err){status(err.message,1)}
+  busy(false);
+});
+$("list").addEventListener("click",async e=>{
+  const b=e.target.closest(".del");if(!b||!confirm("Padam berita ini?"))return;
+  busy(true);status("Memadam...");
+  try{const{sha,list}=await get();const n=list.filter(p=>p.id!==b.dataset.id);await put(n,sha,"Padam berita");showList(n);status("Berita dipadam. Laman dikemas kini dalam 1 hingga 2 minit.")}
+  catch(err){status(err.message,1)}
+  busy(false);
+});
+</script>
+</body>
+</html>
