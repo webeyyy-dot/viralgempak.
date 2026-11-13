@@ -24,6 +24,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 button{font:inherit;font-weight:800;border:0;border-radius:8px;background:var(--accent);color:#1b1710;height:48px;padding:0 20px;cursor:pointer}
 button.alt{background:transparent;color:var(--ink);border:2px solid var(--ink)}
 button.del{height:36px;background:var(--hot);color:#fff;font-size:14px}
+button.del.pic{background:var(--accent);color:#1b1710}
 button:disabled{opacity:.5}
 .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 #msg{min-height:1.5em;margin-top:12px;font-weight:600}
@@ -54,6 +55,8 @@ li span{flex:1;min-width:0}
     <input id="tajuk" autocomplete="off">
     <label for="isi">Isi berita</label>
     <textarea id="isi" placeholder="Tulis atau tampal berita di sini. Biarkan satu baris kosong antara setiap perenggan."></textarea>
+    <label for="gambar">Gambar (pilihan)</label>
+    <input id="gambar" type="file" accept="image/*">
     <div class="actions"><button type="submit" id="pub">Terbitkan</button></div>
   </form>
   <div id="msg" role="status"></div>
@@ -61,6 +64,7 @@ li span{flex:1;min-width:0}
   <h2>Berita sedia ada</h2>
   <div class="actions" style="margin-top:0"><button class="alt" id="load" type="button">Muat senarai berita</button></div>
   <ul id="list"></ul>
+  <input id="gambar2" type="file" accept="image/*" hidden>
 </div>
 
 <script>
@@ -79,9 +83,19 @@ function busy(b){document.querySelectorAll("button").forEach(x=>x.disabled=b)}
 function keep(){lsSet("vg_user",$("user").value.trim());lsSet("vg_repo",$("repo").value.trim());if($("remember").checked)lsSet("vg_token",$("token").value.trim());else lsDel("vg_token")}
 const b64=s=>{let r="";new TextEncoder().encode(s).forEach(c=>r+=String.fromCharCode(c));return btoa(r)};
 const unb64=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,"")),c=>c.charCodeAt(0)));
-const api=()=>"https://api.github.com/repos/"+encodeURIComponent($("user").value.trim())+"/"+encodeURIComponent($("repo").value.trim())+"/contents/berita.json";
+const base=()=>"https://api.github.com/repos/"+encodeURIComponent($("user").value.trim())+"/"+encodeURIComponent($("repo").value.trim())+"/contents/";
+const api=()=>base()+"berita.json";
 const hdr=()=>({Authorization:"Bearer "+$("token").value.trim(),Accept:"application/vnd.github+json"});
 
+let picId="";
+function compress(file){return new Promise((ok,no)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,1200/img.width),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?ok(b):no(new Error("Gambar tak dapat diproses.")),"image/jpeg",.82)};img.onerror=()=>no(new Error("Fail ini bukan gambar yang sah."));img.src=u})}
+const blob64=b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=()=>no(new Error("Gagal membaca gambar."));r.readAsDataURL(b)});
+async function upImg(file,id){
+  const b=await compress(file),path="images/"+id+"-"+Date.now()+".jpg";
+  const r=await fetch(base()+path,{method:"PUT",headers:{...hdr(),"Content-Type":"application/json"},body:JSON.stringify({message:"Tambah gambar",content:await blob64(b)})});
+  if(!r.ok)throw new Error(r.status===401||r.status===403?"Token tiada kebenaran menulis. Pilih Contents: Read and write.":"Gagal memuat naik gambar ("+r.status+").");
+  return path;
+}
 async function get(){
   const r=await fetch(api(),{headers:hdr(),cache:"no-store"});
   if(!r.ok)throw new Error(r.status===401?"Token salah atau sudah tamat tempoh.":r.status===404?"Fail berita.json tidak dijumpai. Semak nama pengguna, nama repositori dan token.":"Ralat GitHub ("+r.status+").");
@@ -95,9 +109,10 @@ async function put(list,sha,msg){
 function showList(list){
   const ul=$("list");ul.textContent="";
   list.forEach(p=>{
-    const li=document.createElement("li"),sp=document.createElement("span"),bt=document.createElement("button");
+    const li=document.createElement("li"),sp=document.createElement("span"),bt=document.createElement("button"),gb=document.createElement("button");
+    gb.textContent=p.gambar?"Tukar gambar":"Tambah gambar";gb.type="button";gb.className="del pic";gb.dataset.id=p.id;
     sp.textContent=p.kat+": "+p.tajuk;bt.textContent="Padam";bt.type="button";bt.className="del";bt.dataset.id=p.id;
-    li.append(sp,bt);ul.append(li);
+    li.append(sp,gb,bt);ul.append(li);
   });
   if(!list.length)ul.textContent="Tiada berita.";
 }
@@ -109,11 +124,14 @@ $("form").addEventListener("submit",async e=>{
   if(!tajuk||!isi.length){status("Isi tajuk dan berita dahulu.",1);return}
   keep();busy(true);status("Sedang menerbitkan...");
   try{
+    const f=$("gambar").files[0],id="berita-"+Date.now();let gambar="";
+    if(f){status("Memuat naik gambar...");gambar=await upImg(f,id)}
+    status("Menerbitkan...");
     const{sha,list}=await get(),d=new Date();
-    list.unshift({id:"berita-"+Date.now(),kat:$("kat").value,tajuk,tarikh:"Oleh Pasukan Editorial \u00b7 "+d.getDate()+" "+bulan[d.getMonth()]+" "+d.getFullYear(),isi});
+    list.unshift({id,gambar,kat:$("kat").value,tajuk,tarikh:"Oleh Pasukan Editorial \u00b7 "+d.getDate()+" "+bulan[d.getMonth()]+" "+d.getFullYear(),isi});
     await put(list,sha,"Tambah berita: "+tajuk.slice(0,50));
     status("Berjaya! Berita akan muncul di laman dalam 1 hingga 2 minit.");
-    $("tajuk").value="";$("isi").value="";showList(list);
+    $("tajuk").value="";$("isi").value="";$("gambar").value="";showList(list);
   }catch(err){status(err.message,1)}
   busy(false);
 });
@@ -123,9 +141,17 @@ $("load").addEventListener("click",async()=>{
   busy(false);
 });
 $("list").addEventListener("click",async e=>{
+  const pic=e.target.closest(".pic");if(pic){picId=pic.dataset.id;$("gambar2").click();return}
   const b=e.target.closest(".del");if(!b||!confirm("Padam berita ini?"))return;
   busy(true);status("Memadam...");
   try{const{sha,list}=await get();const n=list.filter(p=>p.id!==b.dataset.id);await put(n,sha,"Padam berita");showList(n);status("Berita dipadam. Laman dikemas kini dalam 1 hingga 2 minit.")}
+  catch(err){status(err.message,1)}
+  busy(false);
+});
+$("gambar2").addEventListener("change",async()=>{
+  const f=$("gambar2").files[0];$("gambar2").value="";if(!f||!picId)return;
+  keep();busy(true);status("Memuat naik gambar...");
+  try{const path=await upImg(f,picId);const{sha,list}=await get();const it=list.find(p=>p.id===picId);if(it)it.gambar=path;await put(list,sha,"Tambah gambar");showList(list);status("Gambar disimpan. Laman dikemas kini dalam 1 hingga 2 minit.")}
   catch(err){status(err.message,1)}
   busy(false);
 });
